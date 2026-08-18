@@ -1,11 +1,7 @@
-
-import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-
 import requests
-from config import API_KEY
+
+API_KEY = os.environ.get("RAPIDAPI_KEY")
 API_HOST = "irctc-indian-railway-pnr-status.p.rapidapi.com"
 
 
