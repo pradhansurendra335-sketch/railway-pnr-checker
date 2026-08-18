@@ -1,5 +1,5 @@
 import requests
-API_KEY = "c196734e4fmsh7b6888436a0d0c1p1e4b3djsn14beb37a811f"
+from config import API_KEY
 API_HOST = "irctc-indian-railway-pnr-status.p.rapidapi.com"
 
 
