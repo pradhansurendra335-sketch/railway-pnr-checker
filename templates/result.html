@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PNR Result</title>
+</head>
+<body>
+
+<h2>PNR Number: {{ pnr }}</h2>
+
+{% if data.success %}
+
+    <h3>Train Name: {{ data.data.trainName }}</h3>
+    <p><b>Train Number:</b> {{ data.data.trainNumber}}</p>
+    <p><b>From:</b> {{ data.data.sourceStation}}</p>
+    <p><b>To:</b> {{ data.data.destinationStation }}</p>
+    <p><b>Journey Date:</b> {{ data.data.journeyDate }}</p>
+
+
+    <h3>Passenger Status</h3>
+{% for p in data.data.passengerList %}
+        <p>
+            Passenger {{ p.passengerSerialNumber }} 
+            Booking - {{ p.bookingStatus }}
+            Current - {{ p.currentStatus }}
+            coach - {{ p.currentCoachId }}
+            berth - {{ p.currentBerthNo }}
+        </p>
+    {% endfor %}
+
+{% else %}
+
+    <p style="color:red;">
+        {{ data.message }}
+    </p>
+
+{% endif %}
+
+<br>
+<a href="/">Check Another PNR</a>
+
+</body>
+</html>

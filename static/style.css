@@ -1,0 +1,26 @@
+body {
+    font-family: Arial;
+    text-align: center;
+    background: #f2f2f2;
+    margin-top: 50px;
+    background-image: url("123.webp");
+    background-size: cover
+}
+
+input {
+    width: 250px;
+    padding: 10px;
+    font-size: 16px;
+}
+
+button {
+    padding: 10px 20px;
+    background: green;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background: darkgreen;
+}

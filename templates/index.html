@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PNR Checker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<h1>Railway PNR Status Checker</h1>
+
+<form action="/result" method="POST">
+    <input
+        type="text"
+        name="pnr"
+        placeholder="Enter 10-digit PNR Number"
+        maxlength="10"
+        required>
+
+    <br><br>
+
+    <button type="submit">Check PNR</button>
+</form>
+
+</body>
+</html>
