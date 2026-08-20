@@ -53,3 +53,35 @@ def save_pnr_data(pnr, data):
 
     cursor.close()
     conn.close()
+
+def update_pnr_data(pnr, current_status):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    query = """
+    UPDATE pnr_data
+    SET current_status = %s
+    WHERE pnr_number = %s
+    """
+
+    cursor.execute(query, (current_status, pnr))
+    conn.commit()
+
+    cursor.close()
+    conn.close()    
+
+def delete_pnr_data(pnr):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    query = """
+    DELETE FROM pnr_data
+    WHERE pnr_number = %s
+    """
+
+    cursor.execute(query, (pnr,))
+
+    conn.commit()
+
+    cursor.close()
+    conn.close()

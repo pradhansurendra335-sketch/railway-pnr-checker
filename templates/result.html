@@ -10,22 +10,114 @@
 {% if data.success %}
 
     <h3>Train Name: {{ data.data.trainName }}</h3>
-    <p><b>Train Number:</b> {{ data.data.trainNumber}}</p>
-    <p><b>From:</b> {{ data.data.sourceStation}}</p>
-    <p><b>To:</b> {{ data.data.destinationStation }}</p>
-    <p><b>Journey Date:</b> {{ data.data.journeyDate }}</p>
+
+    <p>
+        <b>Train Number:</b>
+        {{ data.data.trainNumber }}
+    </p>
+
+    <p>
+        <b>From:</b>
+        {{ data.data.sourceStation }}
+    </p>
+
+    <p>
+        <b>To:</b>
+        {{ data.data.destinationStation }}
+    </p>
+
+    <p>
+        <b>Journey Date:</b>
+        {{ data.data.journeyDate }}
+    </p>
 
 
     <h3>Passenger Status</h3>
-{% for p in data.data.passengerList %}
-        <p>
-            Passenger {{ p.passengerSerialNumber }} 
-            Booking - {{ p.bookingStatus }}
-            Current - {{ p.currentStatus }}
-            coach - {{ p.currentCoachId }}
-            berth - {{ p.currentBerthNo }}
-        </p>
+
+    {% for p in data.data.passengerList %}
+
+        <div>
+            <p>
+                <b>Passenger:</b>
+                {{ p.passengerSerialNumber }}
+            </p>
+
+            <p>
+                <b>Booking Status:</b>
+                {{ p.bookingStatus }}
+            </p>
+
+            <p>
+                <b>Current Status:</b>
+                {{ p.currentStatus }}
+            </p>
+
+            <p>
+                <b>Coach:</b>
+                {{ p.currentCoachId }}
+            </p>
+
+            <p>
+                <b>Berth:</b>
+                {{ p.currentBerthNo }}
+            </p>
+
+            <hr>
+        </div>
+
     {% endfor %}
+
+
+    <!-- UPDATE PNR -->
+
+    <h3>Update PNR Status</h3>
+
+    <form action="/update" method="POST">
+
+        <input
+            type="hidden"
+            name="pnr"
+            value="{{ pnr }}"
+        >
+
+        <label>New Current Status:</label>
+
+        <input
+            type="text"
+            name="current_status"
+            placeholder="Example: CNF/B2/45"
+            required
+        >
+
+        <button type="submit">
+            Update Status
+        </button>
+
+    </form>
+
+
+    <!-- DELETE PNR -->
+
+    <h3>Delete Saved PNR</h3>
+
+    <form
+        action="/delete"
+        method="POST"
+        onsubmit="return confirm('Are you sure you want to delete this PNR from the database?');"
+    >
+
+        <input
+            type="hidden"
+            name="pnr"
+            value="{{ pnr }}"
+        >
+
+        <button type="submit">
+            Delete PNR
+        </button>
+
+    </form>
+
 
 {% else %}
 
@@ -36,6 +128,7 @@
 {% endif %}
 
 <br>
+
 <a href="/">Check Another PNR</a>
 
 </body>
