@@ -2,6 +2,7 @@ import os
 import requests
 
 API_KEY = os.environ.get("RAPIDAPI_KEY")
+print("API_KEY found:", API_KEY)
 API_HOST = "irctc-indian-railway-pnr-status.p.rapidapi.com"
 
 
