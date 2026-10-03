@@ -39,11 +39,11 @@ def save_pnr_data(pnr, data):
 
     values = (
         pnr,
-        train.get("trainNo"),
+        train.get("trainNumber"),
         train.get("trainName"),
         train.get("sourceStation"),
         train.get("destinationStation"),
-        train.get("journeyDate"),
+        train.get("dateOfJourney"),
         passenger.get("bookingStatus"),
         passenger.get("currentStatus")
     )

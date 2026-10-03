@@ -1,25 +1,37 @@
 <!DOCTYPE html>
-<html>
+<html lang="{{ current_lang }}">
 <head>
-    <title>PNR Checker</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>{{ t('app_title') }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
-<h1>Railway PNR Status Checker</h1>
+{% include 'partials/nav.html' %}
 
-<form action="/result" method="POST">
-    <input
-        type="text"
-        name="pnr"
-        placeholder="Enter 10-digit PNR Number"
-        maxlength="10"
-        required>
+<div class="page">
+    <div class="card">
+        <h1>{{ t('app_title') }}</h1>
+        <p class="subtitle">{{ t('app_subtitle') }}</p>
 
-    <br><br>
+        <form action="/result" method="POST" class="pnr-form">
+            <input
+                type="text"
+                name="pnr"
+                inputmode="numeric"
+                pattern="[0-9]{10}"
+                placeholder="{{ t('pnr_placeholder') }}"
+                maxlength="10"
+                required
+                autofocus>
 
-    <button type="submit">Check PNR</button>
-</form>
+            <button type="submit">{{ t('check_pnr') }}</button>
+        </form>
+    </div>
+</div>
+
+{% include 'partials/chat_widget.html' %}
 
 </body>
 </html>

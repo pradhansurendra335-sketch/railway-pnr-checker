@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="{{ current_lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>{{ t('running_status_title') }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+{% include 'partials/nav.html' %}
+
+<div class="page">
+    <div class="card">
+        <h1>{{ t('running_status_title') }}</h1>
+        <p class="subtitle">{{ t('running_status_subtitle') }}</p>
+
+        <form action="{{ url_for('running_status_result') }}" method="POST" class="pnr-form">
+            <input
+                type="text"
+                name="train_no"
+                inputmode="numeric"
+                placeholder="{{ t('train_no_placeholder') }}"
+                maxlength="5"
+                required
+                value="{{ train_no or '' }}">
+
+            <select name="start_day">
+                <option value="0">{{ t('start_day_today') }}</option>
+                <option value="1">{{ t('start_day_yesterday') }}</option>
+            </select>
+
+            <button type="submit">{{ t('check_status') }}</button>
+        </form>
+
+        {% if data %}
+            {% if data.success and data.data %}
+                {% set d = data.data %}
+
+                <div class="train-info" style="margin-top:20px;">
+                    <h3>{{ d.train_name }} <span class="train-no">#{{ d.train_number }}</span></h3>
+
+                    <div class="route-row">
+                        <div>
+                            <span class="label">{{ t('from_label') }}</span>
+                            <p>{{ d.source_stn_name }}</p>
+                        </div>
+                        <div class="arrow">&#8594;</div>
+                        <div>
+                            <span class="label">{{ t('to_label') }}</span>
+                            <p>{{ d.dest_stn_name }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                {% if d.current_station_name %}
+
+                    <!-- EN ROUTE: train has departed, show live position -->
+                    <div class="status-banner {% if d.delay and d.delay > 15 %}status-late{% else %}status-active{% endif %}">
+                        <p class="status-title">Near {{ d.current_station_name }}</p>
+                        <p class="status-sub">{{ d.delay_text }} &middot; {{ d.status_as_of }}</p>
+                    </div>
+
+                    {% if d.progress_percent is not none %}
+                        <div class="progress-wrap">
+                            <div class="progress-track">
+                                <div class="progress-fill" style="width: {{ d.progress_percent }}%;"></div>
+                            </div>
+                            <p class="progress-label">
+                                {{ d.distance_from_source }} / {{ d.total_distance }} km covered
+                                ({{ d.progress_percent }}%)
+                            </p>
+                        </div>
+                    {% endif %}
+
+                    {% if d.next_stoppage_info and d.next_stoppage_info.next_stoppage %}
+                        <div class="fact" style="margin-top:14px;">
+                            <span class="label">Next Stop</span>
+                            <span>
+                                {{ d.next_stoppage_info.next_stoppage }}
+                                {% if d.next_stoppage_info.next_stoppage_time_diff %}
+                                    &mdash; arriving {{ d.next_stoppage_info.next_stoppage_time_diff }}
+                                {% endif %}
+                            </span>
+                        </div>
+                    {% endif %}
+
+                    {% if d.upcoming_stations_clean %}
+                        <h3 class="section-title">Upcoming Stations</h3>
+                        {% for s in d.upcoming_stations_clean %}
+                            <div class="passenger-card">
+                                <div class="passenger-row">
+                                    <span class="label">{{ s.station_name }} ({{ s.station_code }})</span>
+                                    <span class="status-badge">{{ s.eta }}</span>
+                                </div>
+                                {% if s.platform_number and s.platform_number > 0 %}
+                                    <div class="passenger-row">
+                                        <span class="label">Platform</span>
+                                        <span>{{ s.platform_number }}</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                {% else %}
+
+                    <!-- NOT YET DEPARTED: schedule-only status -->
+                    <div class="status-banner status-off">
+                        <p class="status-title">{{ d.title }}</p>
+                        {% if d.new_message %}
+                            <p class="status-sub">{{ d.new_message }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="fact-grid">
+                        <div class="fact">
+                            <span class="label">Scheduled Departure</span>
+                            <span>{{ d.std }}</span>
+                        </div>
+
+                        {% if d.next_station_name %}
+                            <div class="fact">
+                                <span class="label">Next Station</span>
+                                <span>{{ d.next_station_name }} ({{ d.next_station_code }})</span>
+                            </div>
+                        {% endif %}
+
+                        {% if d.platform_number %}
+                            <div class="fact">
+                                <span class="label">Platform</span>
+                                <span>{{ d.platform_number }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                {% endif %}
+
+                <!-- Shared facts, shown either way -->
+                <div class="fact-grid" style="margin-top:12px;">
+                    {% if d.journey_time_display %}
+                        <div class="fact">
+                            <span class="label">Journey Duration</span>
+                            <span>{{ d.journey_time_display }}</span>
+                        </div>
+                    {% endif %}
+
+                    {% if d.run_days %}
+                        <div class="fact">
+                            <span class="label">Runs On</span>
+                            <span>
+                                {% if d.run_days == 'MON,TUE,WED,THU,FRI,SAT,SUN' %}
+                                    Daily
+                                {% else %}
+                                    {{ d.run_days }}
+                                {% endif %}
+                            </span>
+                        </div>
+                    {% endif %}
+
+                    <div class="fact">
+                        <span class="label">Pantry Car</span>
+                        <span>{{ 'Available' if d.pantry_available else 'Not Available' }}</span>
+                    </div>
+                </div>
+
+                {% if d.disclaimer %}
+                    <p class="disclaimer">{{ d.disclaimer }}</p>
+                {% endif %}
+
+            {% else %}
+                <p class="error-message">{{ data.message }}</p>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+
+{% include 'partials/chat_widget.html' %}
+
+</body>
+</html>

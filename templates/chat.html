@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="{{ current_lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>{{ t('chat_title') }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+{% include 'partials/nav.html' %}
+
+<div class="page">
+    <div class="card">
+        <h1>{{ t('chat_title') }}</h1>
+        <p class="subtitle">Tap the chat bubble in the corner to ask a question any time.</p>
+    </div>
+</div>
+
+{% include 'partials/chat_widget.html' %}
+
+<script>
+  // Auto-open the chat window on this dedicated page.
+  document.addEventListener('DOMContentLoaded', function () {
+      document.getElementById('chat-window').classList.remove('hidden');
+  });
+</script>
+
+</body>
+</html>

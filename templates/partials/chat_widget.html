@@ -1,0 +1,112 @@
+<!-- Floating chat button, present on every page. Talks to /api/chat. -->
+<div id="chat-widget">
+    <button id="chat-toggle" aria-label="{{ t('chat_title') }}">💬</button>
+
+    <div id="chat-window" class="hidden">
+        <div class="chat-header">
+            <span>{{ t('chat_title') }}</span>
+            <button id="chat-close" aria-label="Close">&times;</button>
+        </div>
+        <div id="chat-messages"></div>
+        <form id="chat-form">
+            <input id="chat-input" type="text" placeholder="{{ t('chat_placeholder') }}" autocomplete="off" required>
+            <button type="submit">{{ t('chat_send') }}</button>
+        </form>
+    </div>
+</div>
+
+<script>
+(function () {
+    var toggle = document.getElementById('chat-toggle');
+    var win = document.getElementById('chat-window');
+    var closeBtn = document.getElementById('chat-close');
+    var form = document.getElementById('chat-form');
+    var input = document.getElementById('chat-input');
+    var messages = document.getElementById('chat-messages');
+    var history = [];
+
+    toggle.addEventListener('click', function () {
+        win.classList.toggle('hidden');
+    });
+    closeBtn.addEventListener('click', function () {
+        win.classList.add('hidden');
+    });
+
+    function escapeHtml(text) {
+        var div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function formatBotText(text) {
+        // Safety net: the AI is told not to use markdown, but just in case it
+        // slips, turn basic **bold** / line breaks into real HTML instead of
+        // showing literal asterisks. Escape first so no real HTML can be injected.
+        var safe = escapeHtml(text);
+        safe = safe.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        safe = safe.replace(/\n/g, '<br>');
+        return safe;
+    }
+
+    function addMessage(role, text) {
+        var el = document.createElement('div');
+        el.className = 'chat-msg ' + role;
+
+        if (role === 'bot') {
+            el.innerHTML = formatBotText(text);
+        } else {
+            el.textContent = text; // user's own text never needs HTML formatting
+        }
+
+        messages.appendChild(el);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    var waitingForReply = false;
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        // Block sending a new message until the previous one has replied --
+        // sending several at once can queue up on the server and time out.
+        if (waitingForReply) return;
+
+        var text = input.value.trim();
+        if (!text) return;
+
+        addMessage('user', text);
+        history.push({role: 'user', content: text});
+        input.value = '';
+
+        waitingForReply = true;
+        input.disabled = true;
+
+        var typingEl = document.createElement('div');
+        typingEl.className = 'chat-msg bot typing';
+        typingEl.textContent = '...';
+        messages.appendChild(typingEl);
+        messages.scrollTop = messages.scrollHeight;
+
+        fetch('/api/chat', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({message: text, history: history})
+        })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+            typingEl.remove();
+            addMessage('bot', data.reply);
+            history.push({role: 'assistant', content: data.reply});
+        })
+        .catch(function () {
+            typingEl.remove();
+            addMessage('bot', 'Something went wrong. Please try again.');
+        })
+        .finally(function () {
+            waitingForReply = false;
+            input.disabled = false;
+            input.focus();
+        });
+    });
+})();
+</script>

@@ -1,135 +1,113 @@
 <!DOCTYPE html>
-<html>
+<html lang="{{ current_lang }}">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>PNR Result</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
-<h2>PNR Number: {{ pnr }}</h2>
+{% include 'partials/nav.html' %}
 
-{% if data.success %}
+<div class="page">
+  <div class="card">
 
-    <h3>Train Name: {{ data.data.trainName }}</h3>
+    <h2 class="pnr-heading">{{ t('pnr_heading') }}: {{ pnr }}</h2>
 
-    <p>
-        <b>Train Number:</b>
-        {{ data.data.trainNumber }}
-    </p>
+    {% if data.success %}
 
-    <p>
-        <b>From:</b>
-        {{ data.data.sourceStation }}
-    </p>
+        <div class="train-info">
+            <h3>{{ data.data.trainName }} <span class="train-no">#{{ data.data.trainNumber }}</span></h3>
 
-    <p>
-        <b>To:</b>
-        {{ data.data.destinationStation }}
-    </p>
+            <div class="route-row">
+                <div>
+                    <span class="label">{{ t('from_label') }}</span>
+                    <p>{{ data.data.sourceStation }}</p>
+                </div>
+                <div class="arrow">&#8594;</div>
+                <div>
+                    <span class="label">{{ t('to_label') }}</span>
+                    <p>{{ data.data.destinationStation }}</p>
+                </div>
+            </div>
 
-    <p>
-        <b>Journey Date:</b>
-        {{ data.data.journeyDate }}
-    </p>
-
-
-    <h3>Passenger Status</h3>
-
-    {% for p in data.data.passengerList %}
-
-        <div>
-            <p>
-                <b>Passenger:</b>
-                {{ p.passengerSerialNumber }}
-            </p>
-
-            <p>
-                <b>Booking Status:</b>
-                {{ p.bookingStatus }}
-            </p>
-
-            <p>
-                <b>Current Status:</b>
-                {{ p.currentStatus }}
-            </p>
-
-            <p>
-                <b>Coach:</b>
-                {{ p.currentCoachId }}
-            </p>
-
-            <p>
-                <b>Berth:</b>
-                {{ p.currentBerthNo }}
-            </p>
-
-            <hr>
+            <p class="journey-date"><span class="label">{{ t('journey_date_label') }}</span> {{ data.data.dateOfJourney }}</p>
         </div>
 
-    {% endfor %}
+        <h3 class="section-title">{{ t('passenger_status_title') }}</h3>
+
+        {% for p in data.data.passengerList %}
+
+            <div class="passenger-card">
+                <div class="passenger-row">
+                    <span class="label">Passenger {{ p.passengerSerialNumber }}</span>
+                </div>
+                <div class="passenger-row">
+                    <span class="label">{{ t('booking_status_label') }}</span>
+                    <span>{{ p.bookingStatus }}</span>
+                </div>
+                <div class="passenger-row">
+                    <span class="label">{{ t('current_status_label') }}</span>
+                    <span class="status-badge">{{ p.currentStatus }}</span>
+                </div>
+                <div class="passenger-row">
+                    <span class="label">{{ t('coach_berth_label') }}</span>
+                    <span>{{ p.currentCoachId }} / {{ p.currentBerthNo }}</span>
+                </div>
+            </div>
+
+        {% endfor %}
 
 
-    <!-- UPDATE PNR -->
+        <!-- UPDATE PNR -->
+        <details class="action-block">
+            <summary>{{ t('update_status_title') }}</summary>
 
-    <h3>Update PNR Status</h3>
+            <form action="/update" method="POST" class="stacked-form">
+                <input type="hidden" name="pnr" value="{{ pnr }}">
 
-    <form action="/update" method="POST">
+                <label for="current_status">{{ t('new_current_status_label') }}</label>
+                <input
+                    type="text"
+                    id="current_status"
+                    name="current_status"
+                    placeholder="Example: CNF/B2/45"
+                    required
+                >
 
-        <input
-            type="hidden"
-            name="pnr"
-            value="{{ pnr }}"
-        >
-
-        <label>New Current Status:</label>
-
-        <input
-            type="text"
-            name="current_status"
-            placeholder="Example: CNF/B2/45"
-            required
-        >
-
-        <button type="submit">
-            Update Status
-        </button>
-
-    </form>
+                <button type="submit">{{ t('update_status_btn') }}</button>
+            </form>
+        </details>
 
 
-    <!-- DELETE PNR -->
+        <!-- DELETE PNR -->
+        <details class="action-block">
+            <summary>{{ t('delete_pnr_title') }}</summary>
 
-    <h3>Delete Saved PNR</h3>
+            <form
+                action="/delete"
+                method="POST"
+                class="stacked-form"
+                onsubmit="return confirm('Are you sure you want to delete this PNR from the database?');"
+            >
+                <input type="hidden" name="pnr" value="{{ pnr }}">
+                <button type="submit" class="danger">{{ t('delete_pnr_btn') }}</button>
+            </form>
+        </details>
 
-    <form
-        action="/delete"
-        method="POST"
-        onsubmit="return confirm('Are you sure you want to delete this PNR from the database?');"
-    >
+    {% else %}
 
-        <input
-            type="hidden"
-            name="pnr"
-            value="{{ pnr }}"
-        >
+        <p class="error-message">{{ data.message }}</p>
 
-        <button type="submit">
-            Delete PNR
-        </button>
+    {% endif %}
 
-    </form>
+    <a class="back-link" href="/">&#8592; {{ t('check_another') }}</a>
 
+  </div>
+</div>
 
-{% else %}
-
-    <p style="color:red;">
-        {{ data.message }}
-    </p>
-
-{% endif %}
-
-<br>
-
-<a href="/">Check Another PNR</a>
+{% include 'partials/chat_widget.html' %}
 
 </body>
 </html>

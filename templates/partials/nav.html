@@ -1,0 +1,13 @@
+<nav class="topnav">
+    <a href="{{ url_for('home') }}">{{ t('nav_home') }}</a>
+    <a href="{{ url_for('running_status_form') }}">{{ t('nav_running_status') }}</a>
+    <a href="{{ url_for('chat_page') }}">{{ t('nav_chat') }}</a>
+
+    <div class="lang-switch">
+        <select onchange="if(this.value){window.location.href='/set-language/'+this.value;}">
+            {% for code, label in supported_languages.items() %}
+                <option value="{{ code }}" {% if code == current_lang %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</nav>
